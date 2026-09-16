@@ -264,8 +264,13 @@ def tensor_map(
         in_shape: Shape,
         in_strides: Strides,
     ) -> None:
-        # TODO: Implement for Task 2.3.
-        raise NotImplementedError('Need to implement for Task 2.3')
+        out_index = np.zeros_like(out_shape)
+        in_index = np.zeros_like(in_shape)
+        for position in range(len(out)):
+            to_index(position, out_shape, out_index)
+            broadcast_index(out_index, out_shape, in_shape, in_index)
+            out[index_to_position(out_index, out_strides)] = fn(
+                in_storage[index_to_position(in_index, in_strides)])
 
     return _map
 
@@ -309,8 +314,17 @@ def tensor_zip(
         b_shape: Shape,
         b_strides: Strides,
     ) -> None:
-        # TODO: Implement for Task 2.3.
-        raise NotImplementedError('Need to implement for Task 2.3')
+        out_index = np.zeros_like(out_shape)
+        a_index = np.zeros_like(a_shape)
+        b_index = np.zeros_like(b_shape)
+        for position in range(len(out)):
+            to_index(position, out_shape, out_index)
+            broadcast_index(out_index, out_shape, a_shape, a_index)
+            broadcast_index(out_index, out_shape, b_shape, b_index)
+            out[index_to_position(out_index, out_strides)] = fn(
+                a_storage[index_to_position(a_index, a_strides)],
+                b_storage[index_to_position(b_index, b_strides)]
+            )
 
     return _zip
 
@@ -340,8 +354,18 @@ def tensor_reduce(
         a_strides: Strides,
         reduce_dim: int,
     ) -> None:
-        # TODO: Implement for Task 2.3.
-        raise NotImplementedError('Need to implement for Task 2.3')
+        out_index = np.zeros_like(out_shape)
+        a_index = np.zeros_like(a_shape)
+        for position in range(len(out)):
+            to_index(position, out_shape, out_index)
+            a_index[:] = out_index[:]
+            a_index[reduce_dim] = 0
+            cur = a_storage[index_to_position(a_index, a_strides)]
+            for i in range(1, a_shape[reduce_dim]):
+                a_index[reduce_dim] = i
+                cur = fn(cur, a_storage[index_to_position(a_index, a_strides)])
+
+            out[index_to_position(out_index, out_strides)] = cur
 
     return _reduce
 
